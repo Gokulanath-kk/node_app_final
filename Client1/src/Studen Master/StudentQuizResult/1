@@ -1,0 +1,247 @@
+import React, { useCallback, useEffect, useState } from 'react';
+import axiosInstance from '../../axiosInstance';
+import { ChevronLeftCircle, ChevronRightCircle } from 'lucide-react';
+
+const QuizResult = () => {
+    const [course, setCourse] = useState([]);
+    const [progress, setProgress] = useState({
+        totalCorrect: 0,
+        totalWrong: 0,
+        totalQuizzes: 0,
+        percentage: 0,
+    });
+    const [quizResults, setQuizResults] = useState([]);
+    const [quizData, setQuizData] = useState([]);
+    const [currentQuizIndex, setCurrentQuizIndex] = useState(0);
+    const [selectedAnswer, setSelectedAnswer] = useState(null);
+    const [timeLeft, setTimeLeft] = useState(60);
+    const [showSubmitModal, setShowSubmitModal] = useState(false);
+
+    const userData = JSON.parse(sessionStorage.getItem("userData")) || {};
+    const course_id = userData[0]?.course_id || '';
+    const student_id = userData[0]?.student_id || '';
+
+    const fetchCourse = useCallback(async () => {
+        if (!course_id) return;
+        try {
+            const res = await axiosInstance.get(`/courses/viewCourse/${course_id}`);
+            if (res.data && res.data.length > 0) {
+                setCourse(res.data[0].course_name);
+            } else {
+                throw new Error('Course name not found');
+            }
+        } catch (err) {
+            console.error("Error fetching course name:", err);
+        }
+    }, [course_id]);
+
+    const fetchProgress = useCallback(async () => {
+        if (!course_id || !student_id) return;
+        try {
+            const res = await axiosInstance.post('/quizprogress/resultProgress', {
+                course_id,
+                student_id,
+            });
+
+            if (res.data) {
+                const validQuizzes = res.data.filter(
+                    (item) => item.correct_quiz !== null || item.wrong_quiz !== null
+                );
+                setQuizResults(validQuizzes);
+            } else {
+                throw new Error('Progress data not found');
+            }
+        } catch (err) {
+            console.error("Error fetching progress:", err);
+        }
+    }, [course_id, student_id]);
+
+    const fetchQuizzes = useCallback(async () => {
+        try {
+            const res = await axiosInstance.get(`/quiz/coursequiz/${course_id}`);
+            setQuizData(res.data);
+            console.log('Fetched Quiz Data:', res.data); // Debug log
+        } catch (err) {
+            console.error("Error fetching quizzes:", err);
+        }
+    }, [course_id]);
+
+    useEffect(() => {
+        fetchCourse();
+        fetchProgress();
+        fetchQuizzes();
+    }, [fetchCourse, fetchProgress, fetchQuizzes]);
+
+    useEffect(() => {
+        if (quizData.length > 0) {
+            console.log('Current Quiz:', quizData[currentQuizIndex]);
+            console.log('Current Quiz Options:', quizData[currentQuizIndex]?.quiz_option);
+        }
+    }, [currentQuizIndex, quizData]);
+
+    const currentQuiz = quizData[currentQuizIndex];
+
+    const options = currentQuiz?.quiz_option
+        ? (Array.isArray(currentQuiz.quiz_option)
+            ? currentQuiz.quiz_option
+            : (typeof currentQuiz.quiz_option === 'string'
+                ? JSON.parse(currentQuiz.quiz_option)
+                : []))
+        : [];
+
+    const isLastQuestion = currentQuizIndex === quizData.length - 1;
+
+    const handleAnswerSelect = (optionId) => {
+        setSelectedAnswer(optionId);
+    };
+
+    const isAnswerCorrect = (selectedOption) => {
+        const quizResult = quizResults[currentQuizIndex];
+        return quizResult && selectedOption === quizResult.correct_quiz;
+    };
+
+    const getOptionStyle = (option) => {
+        const isSelected = selectedAnswer === option.id;
+        const isCorrect = isAnswerCorrect(option.id);
+
+        if (isSelected) {
+            return isCorrect ? 'bg-green-500 text-white' : 'bg-red-500 text-white';
+        }
+
+        return 'bg-purple-300 hover:bg-purple-500 text-gray-950 text-lg';
+    };
+
+    const handleNext = useCallback(() => {
+        if (selectedAnswer === null) return;
+        if (currentQuizIndex < quizData.length - 1) {
+            setCurrentQuizIndex((prev) => prev + 1);
+            setSelectedAnswer(null);
+            setTimeLeft(60);
+        } else if (isLastQuestion) {
+            setShowSubmitModal(true);
+        }
+    }, [currentQuizIndex, isLastQuestion, selectedAnswer, quizData.length]);
+
+    const handlePrevious = useCallback(() => {
+        if (currentQuizIndex > 0) {
+            setCurrentQuizIndex((prev) => prev - 1);
+            setSelectedAnswer(null);
+            setTimeLeft(60);
+        }
+    }, [currentQuizIndex]);
+
+    return (
+        <div className="px-20 py-10 bg-slate-50 h-screen">
+            <div className="bg-white rounded-lg shadow-lg p-6 max-w-screen mx-auto">
+                <div className="flex items-center mb-4">
+                    <h2 className="text-xl font-semibold text-start flex-1 text-slate-600">Your results :</h2>
+                    <div className="flex items-center space-x-4">
+                        <div className="flex items-center">
+                            <div className="w-5 h-5 bg-green-500 rounded-sm mr-2"></div>
+                            <span className="text-black">Correct answers</span>
+                        </div>
+                        <div className="flex items-center">
+                            <div className="w-5 h-5 bg-red-500 rounded-sm mr-2"></div>
+                            <span className="text-black">Incorrect answers</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-5 gap-4 mt-10">
+                    {quizResults.map((quiz, index) => (
+                        <div key={index} className="flex items-center justify-center text-center">
+                            <div
+                                className={`w-6 h-6 rounded-sm ${quiz.correct_quiz !== null ? 'bg-green-500' : 'bg-red-500'}`}
+                            >
+                                <span className="text-white text-sm flex items-center justify-center">{index + 1}</span>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-lg p-6 max-w-screen mx-auto mt-5">
+                <div className="bg-white rounded-md shadow-sm">
+                    <div className="border-b border-gray-200 p-4 bg-purple-100 rounded-t">
+                        <div className="flex justify-between items-center">
+                            <h2 className="text-xl font-semibold text-gray-900">
+                                Question {currentQuizIndex + 1}
+                            </h2>
+                            <div className="flex items-center gap-2">
+                                <span className="font-medium text-gray-600">Points:</span>
+                                <span className="flex items-center gap-1">
+                                    <span className="w-5 h-5 text-yellow-400" />
+                                    <span className="text-lg font-semibold">1</span>
+                                </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <span className="w-5 h-5 text-orange-600" />
+                                <span className="font-mono text-lg font-medium">{timeLeft}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="p-6 bg-purple-100">
+                        <h3 className="text-lg font-medium text-gray-900 mb-6">{currentQuiz?.Quiz_Question}</h3>
+                        <div className="space-y-3">
+                            {options.length > 0 ? (
+                                options.map((option, index) => {
+                                    const optionLabel = String.fromCharCode(65 + index);
+                                    return (
+                                        <div
+                                            key={option.id}
+                                            onClick={() => handleAnswerSelect(option.id)}
+                                            className={`flex items-center gap-4 p-3 rounded-md border cursor-pointer 
+                                                ${getOptionStyle(option)}`}
+                                        >
+                                            <div
+                                                className={`flex items-center justify-center w-8 h-8 rounded-full border-2 
+                                                    ${selectedAnswer === option.id ? 'border-white text-indigo-600' : 'border-slate-400 text-slate-400'}`}
+                                            >
+                                                <span className="font-medium text-inherit">{optionLabel}</span>
+                                            </div>
+                                            <p>{option.text}</p>
+                                        </div>
+                                    );
+                                })
+                            ) : (
+                                <div className="text-red-500">No options available for this quiz</div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+                <div className="flex justify-between items-center">
+                    <button
+                        onClick={handlePrevious}
+                        disabled={currentQuizIndex === 0}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-md border border-purple-300 transition-all 
+                            ${currentQuizIndex === 0
+                                ? 'bg-gray-100 text-gray-400 border-gray-300 cursor-not-allowed'
+                                : 'bg-transparent text-purple-600 border-purple-300 hover:bg-purple-100'}`}
+                    >
+                        <ChevronLeftCircle className="w-5 h-5" />
+                        Previous
+                    </button>
+
+                    <span className="text-gray-600">
+                        Question {currentQuizIndex + 1} of {quizData.length}
+                    </span>
+
+                    <button
+                        onClick={handleNext}
+                        disabled={selectedAnswer === null}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors
+                            ${selectedAnswer === null
+                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                : 'bg-gray-800 text-white hover:bg-gray-700'}`}
+                    >
+                        {isLastQuestion ? 'Finish' : 'Next'}
+                        <ChevronRightCircle className="w-5 h-5" />
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default QuizResult;

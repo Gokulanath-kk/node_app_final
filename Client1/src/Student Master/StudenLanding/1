@@ -1,0 +1,77 @@
+import React from 'react';
+import herobg from '../../Asserts/Image/whiteblurbg.png';
+import logo from '../../Asserts/Image/logo.png';
+import xploretext from '../../Asserts/Image/xploretext.png';
+import HeroRight from '../../Asserts/Image/HeroRightImage.png';
+import { FaComputer, FaUsers } from 'react-icons/fa6';
+import { LiaCertificateSolid } from 'react-icons/lia';
+import { MdOutlinePlayLesson } from 'react-icons/md';
+
+const StudentHero = () => {
+    return (
+        <div
+            className="h-screen bg-cover bg-center"
+            style={{
+                backgroundImage: `url(${herobg})`,
+            }}
+        >
+            <div className="flex items-center gap-3 p-4 z-10">
+                <img src={logo} alt="Logo" className="h-12 w-auto" />
+                <img src={xploretext} alt="xplore text" className="h-8 w-24" />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2  gap-4 relative z-20">
+                {/* Left Section with Text */}
+                <div className="rounded-lg flex flex-col ">
+                    <h2 className="text-left px-20  mb-5 font-bold text-4xl mt-20">Xplore IT Corp</h2>
+                    <p className="text-left px-20 text-slate-600 tracking-wider text-lg">
+                        Lorem ipsum dolor sit amet consectetur. Sit libero non ut fermentum nulla egestas. Non vitae
+                        varius dui velit ut. Adipiscing ultricies ultrices ultricies egestas lectus blandit. Nulla massa
+                        ut tellus donec viverra turpis vestibulum enim.
+                    </p>
+                </div>
+
+                {/* Right Section */}
+                <div className="flex rounded-lg text-center text-blue-600 -mt-5 z-20 relative">
+
+                    <img src={HeroRight} alt="Hero" className="h-auto w-90  z-10 absolute" />
+
+                    <div className='flex-1 relative'>
+
+                        <div className="bg-white/60 backdrop-blur-sm rounded-lg top-24 shadow-lg mb-4 w-40 z-20 absolute p-2 flex items-center space-x-2">
+                            <div className="bg-lite rounded-full p-2">
+                                <MdOutlinePlayLesson className="text-white text-xl" />
+                            </div>
+                            <div>
+                                <span className="text-xl font-bold text-lite">XX+</span>
+                                <p className="text-gray-600">Courses</p>
+                            </div>
+                        </div>
+                        <div className="bg-white/60 backdrop-blur-sm rounded-lg px-4 py-2 shadow-lg mb-4 w-48 z-20 absolute top-56 right-36 flex items-center space-x-2">
+                            <div className="bg-lite rounded-full p-2">
+                                <FaUsers className="text-white text-xl" />
+                            </div>
+                            <div>
+                                <span className="text-xl font-bold text-lite">XXX+</span>
+                                <p className="text-gray-600">Students Placedssss</p>
+                            </div>
+                        </div>
+
+                        <div className="bg-white/60 backdrop-blur-sm rounded-lg px-4 py-2 shadow-lg mb-4 w-48 z-20 absolute top-72  flex items-center space-x-2">
+                            <div className="bg-lite rounded-full p-2">
+                                <LiaCertificateSolid className="text-white text-xl" />
+                            </div>
+                            <div>
+                                <span className="text-xl font-bold text-lite">XXX+</span>
+                                <p className="text-gray-600">Students Placed</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    );
+};
+
+export default StudentHero;

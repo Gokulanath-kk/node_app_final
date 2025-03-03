@@ -1,0 +1,820 @@
+// import React, { useState, useEffect } from 'react';
+// import illustration from '../../Asserts/Image/FeedBackFromLeftPage.png';
+// import { AlertCircle, ChevronDownIcon } from 'lucide-react';
+// import axiosInstance from "../../axiosInstance";
+// import { useNavigate } from 'react-router-dom';
+
+// const StudentReviewForm = () => {
+//     const navigate = useNavigate();
+
+//     const initialFormData = {
+//         name: '',
+//         mobile: '',
+//         email: '',
+//         college: '',
+//         department: '',
+//         year: '',
+//         course_id: '',
+//         course: '',
+//         presentationSkills: '',
+//         questionResponseSkills: '',
+//         overallSessionRating: '',
+//         interestedInCourses: '',
+//         interestedInInternship: '',
+//         selectedTechnologies: []
+//     };
+
+//     const [formData, setFormData] = useState(initialFormData);
+//     const [errors, setErrors] = useState({});
+//     const [rating, setRating] = useState('');
+//     const [selectedTechnologies, setSelectedTechnologies] = useState([]);
+//     const [isModalOpen, setIsModalOpen] = useState(false);
+//     const [courseDetails, setCourseDetails] = useState(null);
+//     const [coursecategory, setCourseCategory] = useState([]);
+//     const [dropdowns, setDropdowns] = useState({
+//         isOpenDepartment: false,
+//         isOpenYear: false,
+//         isOpenCourse: false,
+//     });
+//     const [errorNotification, setErrorNotification] = useState({
+//         show: false,
+//         message: '',
+//     });
+    
+    
+//     const departments = ['Computer Science', 'Mechanical', 'Civil'];
+//     const years = ['1st Year', '2nd Year', '3rd Year', '4th Year'];
+//     const technologies = [
+//         { value: 'AWS', label: 'Amazon Web Services (AWS)' },
+//         { value: 'AI', label: 'Artificial Intelligence' },
+//         { value: 'ML', label: 'Machine Learning' },
+//         { value: 'DS', label: 'Data Science / Analytics' },
+//         { value: 'CyberSecurity', label: 'Cyber Security / Ethical Hacking' },
+//         { value: 'CorePython', label: 'Core Python' },
+//         { value: 'AdvancedPython', label: 'Advanced Python & Frameworks' },
+//         { value: 'CoreJava', label: 'Core JAVA' },
+//         { value: 'IOT', label: 'Internet of Things (IOT)' },
+//         { value: 'EmbeddedSystems', label: 'Embedded Systems' },
+//         { value: 'WebAppDevelopment', label: 'Web Application Development' },
+//         { value: 'FullStackDevelopment', label: 'Full Stack Development' },
+//         { value: 'ReactJS', label: 'React JS / Angular JS' },
+//         { value: 'UIUXDesign', label: 'UI/UX Design' }
+//     ];
+
+//     useEffect(() => {
+//         fetchCoursewithQuizCode();
+//         fetchCourseCategories();
+//     }, []);
+
+//     const fetchCourseCategories = () => {
+//         axiosInstance.get('/courses/coursecategory')
+//             .then((response) => {
+//                 setCourseCategory(response.data);
+//             })
+//             .catch((error) => {
+//                 console.error("Error fetching course category:", error);
+//             });
+//     };
+
+//     const fetchCoursewithQuizCode = async () => {
+//         try {
+//             const courseId = sessionStorage.getItem('course_id');
+//             if (courseId) {
+//                 const courseResponse = await axiosInstance.get(`/courses/viewCourse/${courseId}`);
+//                 const course = courseResponse.data;
+//                 setCourseDetails(course);
+//                 setIsModalOpen(true);
+//             }
+//         } catch (error) {
+//             console.error('Error fetching course:', error);
+//         }
+//     };
+
+//     const handleTechnologyChange = (technology) => {
+//         setSelectedTechnologies(prev => 
+//             prev.includes(technology)
+//                 ? prev.filter(tech => tech !== technology)
+//                 : [...prev, technology]
+//         );
+//     };
+
+//     const validateForm = () => {
+//         const newErrors = {};
+
+//         // Name validation
+//         if (!formData.name.trim()) {
+//             newErrors.name = 'Name is required';
+//         } else if (formData.name.trim().length < 2) {
+//             newErrors.name = 'Name must be at least 2 characters long';
+//         } else if (!/^[A-Za-z\s]+$/.test(formData.name.trim())) {
+//             newErrors.name = 'Name can only contain letters and spaces';
+//         }
+
+//         // Mobile validation
+//         const mobileRegex = /^[0-9]{10}$/;
+//         if (!formData.mobile.trim()) {
+//             newErrors.mobile = 'Mobile number is required';
+//         } else if (!mobileRegex.test(formData.mobile)) {
+//             newErrors.mobile = 'Mobile number must be 10 digits';
+//         }
+
+//         // Email validation
+//         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+//         if (!formData.email.trim()) {
+//             newErrors.email = 'Email is required';
+//         } else if (!emailRegex.test(formData.email)) {
+//             newErrors.email = 'Invalid email format';
+//         }
+
+//         // College validation
+//         if (!formData.college.trim()) {
+//             newErrors.college = 'College name is required';
+//         } else if (formData.college.trim().length < 3) {
+//             newErrors.college = 'College name must be at least 3 characters long';
+//         }
+
+//         // Other required fields
+//         if (!formData.department) {
+//             newErrors.department = 'Department is required';
+//         }
+
+//         if (!formData.year) {
+//             newErrors.year = 'Year is required';
+//         }
+
+//         if (!formData.course_id) {
+//             newErrors.course = 'Course is required';
+//         }
+
+//         setErrors(newErrors);
+//         return Object.keys(newErrors).length === 0;
+//     };
+
+//     const handleInputChange = (e) => {
+//         const { id, value, type, checked } = e.target;
+
+//         if (type === 'checkbox') {
+//             setSelectedTechnologies(prev => 
+//                 checked 
+//                     ? [...prev, value]
+//                     : prev.filter(tech => tech !== value)
+//             );
+//         } else {
+//             setFormData(prev => ({
+//                 ...prev,
+//                 [id]: value
+//             }));
+//         }
+
+//         // Clear specific error when input changes
+//         if (errors[id]) {
+//             setErrors(prev => {
+//                 const newErrors = { ...prev };
+//                 delete newErrors[id];
+//                 return newErrors;
+//             });
+//         }
+//     };
+
+//     const toggleDropdown = (key) => {
+//         setDropdowns(prev => ({
+//             ...prev,
+//             [key]: !prev[key],
+//         }));
+//     };
+
+//     const handleSelect = (field, value, courseId = null) => {
+//         setFormData(prev => ({
+//             ...prev,
+//             [field]: value,
+//             ...(courseId ? { course_id: courseId } : {}),
+//         }));
+
+//         // Clear error for the selected field
+//         if (errors[field]) {
+//             setErrors(prev => {
+//                 const newErrors = { ...prev };
+//                 delete newErrors[field];
+//                 return newErrors;
+//             });
+//         }
+
+//         toggleDropdown(`isOpen${field.charAt(0).toUpperCase() + field.slice(1)}`);
+//     };
+
+//     const handleSubmit = async (e) => {
+//         e.preventDefault();
+
+//         if (!validateForm()) {
+//             return;
+//         }
+
+//         try {
+//             const response = await axiosInstance.post('/student/register', {
+//                 ...formData,
+//                 selectedTechnologies,
+//                 rating
+//             }, {
+//                 headers: {
+//                     'Content-Type': 'application/json',
+//                 },
+//             });
+
+//             if (response.status === 200 || response.status === 201) {
+//                 // Store relevant data in session storage
+//                 sessionStorage.setItem('course_id', formData.course_id);
+//                 sessionStorage.setItem('email', formData.email);
+//                 sessionStorage.setItem('phone_number', formData.mobile);
+
+//                 // Fetch course details
+//                 await fetchCoursewithQuizCode();
+
+//                 // Reset form
+//                 setFormData(initialFormData);
+//                 setSelectedTechnologies([]);
+//                 setRating('');
+//                 setErrors({});
+//             } else {
+//                 throw new Error('Registration failed');
+//             }
+//         } catch (error) {
+//             const errorMessage = error.response?.data?.message || 
+//                                  error.response?.data?.error || 
+//                                  'An unexpected error occurred';
+
+//             setErrorNotification({
+//                 show: true,
+//                 message: errorMessage
+//             });
+
+//             // Automatically hide error after 5 seconds
+//             setTimeout(() => {
+//                 setErrorNotification({ show: false, message: '' });
+//             }, 5000);
+//         }
+//     };
+
+//     const ErrorNotification = () => {
+//         if (!errorNotification.show) return null;
+
+//         return (
+//             <div className="fixed top-4 right-4 z-50 w-96 p-4">
+//                 <div className="bg-red-500 text-white p-4 rounded-lg shadow-lg flex items-center space-x-4 transform transition-all duration-300 ease-out translate-x-0 opacity-100">
+//                     <AlertCircle className="h-6 w-6 text-white" />
+//                     <span className="flex-1">{errorNotification.message}</span>
+//                     <button
+//                         onClick={() => setErrorNotification({ show: false, message: '' })}
+//                         className="text-white hover:bg-red-700 rounded-full p-2 focus:outline-none"
+//                     >
+//                         <span className="text-lg">&times;</span>
+//                     </button>
+//                 </div>
+//             </div>
+//         );
+//     };
+
+//     return (
+//         <>
+//             <div className="min-h-screen flex flex-col lg:grid lg:grid-cols-2">
+//                 <div className="hidden lg:flex lg:justify-center lg:items-center p-4 xl:p-8">
+//                     <div className="border-dashed border-2 border-purple-300 rounded-xl p-6 xl:p-12 flex justify-center items-center h-screen">
+//                         <img
+//                             src={illustration}
+//                             alt="Illustration"
+//                             className="max-w-full max-h-[600px] object-contain xl:w-80"
+//                         />
+//                     </div>
+//                 </div>
+//                 <form onSubmit={handleSubmit} >
+//                     <div className="flex justify-center items-center  bg-purple-200 me-5 px-5 rounded-xl py-10 sm:px-8 md:px-16 lg:px-12 xl:px-32 mt-20">
+//                         <div className="w-full max-w-5xl   mx-auto py-8  ">
+//                             <div className="space-y-4 sm:space-y-5 md:space-y-6 mb-5">
+//                                 <div>
+//                                     <label htmlFor="name" className="block text-xs sm:text-sm font-medium text-purple-700 mb-1 sm:mb-2">Name</label>
+//                                     <input
+//                                         type="text"
+//                                         id="name"
+//                                         value={formData.name}
+//                                         onChange={handleInputChange}
+//                                         className={`w-full px-3 py-2 sm:px-4 sm:py-3 bg-purple-200 text-black border-2 rounded-lg 
+//                   focus:outline-none focus:ring-2 focus:border-transparent 
+//                   transition duration-300 ease-in-out placeholder-purple-400 text-xs sm:text-base
+//                   ${errors.name ? 'border-red-500' : 'border-purple-300'}`}
+//                                         placeholder="Enter your full name"
+//                                     />
+//                                     {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name}</p>}
+//                                 </div>
+
+//                                 <div>
+//                                     <label htmlFor="mobile" className="block text-xs sm:text-sm font-medium text-purple-700 mb-1 sm:mb-2">Mobile Number</label>
+//                                     <div className="flex gap-1 sm:gap-2">
+//                                         <input
+//                                             type="text"
+//                                             value="+91"
+//                                             readOnly
+//                                             className="w-12 sm:w-20 px-2 py-2 sm:px-3 sm:py-3 bg-purple-200 text-black border-2 border-purple-300 rounded-l-lg text-center font-semibold text-xs sm:text-base"
+//                                         />
+//                                         <input
+//                                             type="tel"
+//                                             id="mobile"
+//                                             value={formData.mobile}
+//                                             onChange={handleInputChange}
+//                                             className={`flex-1 px-3 py-2 sm:px-4 sm:py-3 bg-purple-200 text-black border-2 rounded-r-lg 
+//                     focus:outline-none focus:ring-2 focus:border-transparent 
+//                     transition duration-300 ease-in-out placeholder-purple-400 text-xs sm:text-base
+//                     ${errors.mobile ? 'border-red-500' : 'border-purple-300'}`}
+//                                             placeholder="Enter mobile number"
+//                                             maxLength="10"
+//                                         />
+//                                     </div>
+//                                     {errors.mobile && <p className="text-xs text-red-500 mt-1">{errors.mobile}</p>}
+//                                 </div>
+//                                 <div>
+//                                     <label htmlFor="email" className="block text-xs sm:text-sm font-medium text-purple-700 mb-1 sm:mb-2">Email ID</label>
+//                                     <input
+//                                         type="email"
+//                                         id="email"
+//                                         value={formData.email}
+//                                         onChange={handleInputChange}
+//                                         className={`w-full px-3 py-2 sm:px-4 sm:py-3 bg-purple-200 text-black border-2 rounded-lg 
+//                   focus:outline-none focus:ring-2 focus:border-transparent 
+//                   transition duration-300 ease-in-out placeholder-purple-400 text-xs sm:text-base
+//                   ${errors.email ? 'border-red-500' : 'border-purple-300'}`}
+//                                         placeholder="Enter your email id"
+//                                     />
+//                                     {errors.email && <p className="text-xs text-red-500 mt-1">{errors.email}</p>}
+//                                 </div>
+
+//                                 {/* College Input - Responsive */}
+//                                 <div>
+//                                     <label htmlFor="college" className="block text-xs sm:text-sm font-medium text-purple-700 mb-1 sm:mb-2">College</label>
+//                                     <input
+//                                         type="text"
+//                                         id="college"
+//                                         value={formData.college}
+//                                         onChange={handleInputChange}
+//                                         className={`w-full px-3 py-2 sm:px-4 sm:py-3 bg-purple-200 text-black border-2 rounded-lg 
+//                   focus:outline-none focus:ring-2 focus:border-transparent 
+//                   transition duration-300 ease-in-out placeholder-purple-400 text-xs sm:text-base
+//                   ${errors.college ? 'border-red-500' : 'border-purple-300'}`}
+//                                         placeholder="Enter your college name"
+//                                     />
+//                                     {errors.college && <p className="text-xs text-red-500 mt-1">{errors.college}</p>}
+//                                 </div>
+
+//                                 {/* Department and Year Dropdowns - Responsive */}
+//                                 <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+//                                     {/* Department Dropdown */}
+//                                     <div className="flex-1 relative">
+//                                         <label htmlFor="department" className="block text-xs sm:text-sm font-medium text-purple-700 mb-1 sm:mb-2">Department</label>
+//                                         <div
+//                                             className={`w-full px-3 py-2 sm:px-4 sm:py-3 bg-purple-200 text-black border-2 rounded-lg 
+//                   flex items-center justify-between cursor-pointer text-xs sm:text-base
+//                   ${errors.department ? 'border-red-500' : 'border-purple-300'}
+//                   ${dropdowns.isOpenDepartment ? 'rounded-b-none' : ''}`}
+//                                             onClick={() => toggleDropdown('isOpenDepartment')}
+//                                         >
+//                                             <span>{formData.department || 'Select department'}</span>
+//                                             <ChevronDownIcon
+//                                                 className={`w-4 h-4 sm:w-5 sm:h-5 transition-transform 
+//                     ${dropdowns.isOpenDepartment ? 'rotate-180' : ''}`}
+//                                             />
+//                                         </div>
+//                                         {errors.department && <p className="text-xs text-red-500 mt-1">{errors.department}</p>}
+//                                         {dropdowns.isOpenDepartment && (
+//                                             <div className="absolute z-10 w-full bg-purple-200 text-black border-2 border-t-0 border-purple-300 rounded-b-lg shadow-lg">
+//                                                 {departments.map((dept) => (
+//                                                     <div
+//                                                         key={dept}
+//                                                         className="px-3 py-2 sm:px-4 sm:py-3 hover:bg-purple-300 transition-colors cursor-pointer text-xs sm:text-base"
+//                                                         onClick={() => handleSelect('department', dept)}
+//                                                     >
+//                                                         {dept}
+//                                                     </div>
+//                                                 ))}
+//                                             </div>
+//                                         )}
+//                                     </div>
+
+//                                     {/* Year Dropdown */}
+//                                     <div className="flex-1 relative">
+//                                         <label htmlFor="year" className="block text-xs sm:text-sm font-medium text-purple-700 mb-1 sm:mb-2">Year</label>
+//                                         <div
+//                                             className={`w-full px-3 py-2 sm:px-4 sm:py-3 bg-purple-200 text-black border-2 rounded-lg 
+//                   flex items-center justify-between cursor-pointer text-xs sm:text-base
+//                   ${errors.year ? 'border-red-500' : 'border-purple-300'}
+//                   ${dropdowns.isOpenYear ? 'rounded-b-none' : ''}`}
+//                                             onClick={() => toggleDropdown('isOpenYear')}
+//                                         >
+//                                             <span>{formData.year || 'Select year'}</span>
+//                                             <ChevronDownIcon
+//                                                 className={`w-4 h-4 sm:w-5 sm:h-5 transition-transform 
+//                     ${dropdowns.isOpenYear ? 'rotate-180' : ''}`}
+//                                             />
+//                                         </div>
+//                                         {errors.year && <p className="text-xs text-red-500 mt-1">{errors.year}</p>}
+//                                         {dropdowns.isOpenYear && (
+//                                             <div className="absolute z-10 w-full bg-purple-200 text-black border-2 border-t-0 border-purple-300 rounded-b-lg shadow-lg">
+//                                                 {years.map((year) => (
+//                                                     <div
+//                                                         key={year}
+//                                                         className="px-3 py-2 sm:px-4 sm:py-3 hover:bg-purple-300 transition-colors cursor-pointer text-xs sm:text-base"
+//                                                         onClick={() => handleSelect('year', year)}
+//                                                     >
+//                                                         {year}
+//                                                     </div>
+//                                                 ))}
+//                                             </div>
+//                                         )}
+//                                     </div>
+//                                 </div>
+
+//                                 {/* Course Dropdown - Responsive */}
+//                                 <div>
+//                                     <label htmlFor="course" className="block text-xs sm:text-sm font-medium text-purple-700 mb-1 sm:mb-2">Course</label>
+//                                     <div className="relative">
+//                                         <div
+//                                             className={`w-full px-3 py-2 sm:px-4 sm:py-3 bg-purple-200 text-black border-2 rounded-lg 
+//                   flex items-center justify-between cursor-pointer text-xs sm:text-base
+//                   ${errors.course ? 'border-red-500' : 'border-purple-300'}
+//                   ${dropdowns.isOpenCourse ? 'rounded-b-none' : ''}`}
+//                                             onClick={() => toggleDropdown('isOpenCourse')}
+//                                         >
+//                                             <span>{formData.course || 'Select course'}</span>
+//                                             <ChevronDownIcon
+//                                                 className={`w-4 h-4 sm:w-5 sm:h-5 transition-transform 
+//                     ${dropdowns.isOpenCourse ? 'rotate-180' : ''}`}
+//                                             />
+//                                         </div>
+//                                         {errors.course && <p className="text-xs text-red-500 mt-1">{errors.course}</p>}
+//                                         {dropdowns.isOpenCourse && (
+//                                             <div className="absolute z-10 w-full bg-purple-200 text-black border-2 border-t-0 border-purple-300 rounded-b-lg shadow-lg max-h-60 overflow-y-auto">
+//                                                 {coursecategory.map((course) => (
+//                                                     <div
+//                                                         key={course.category_id}
+//                                                         className="px-3 py-2 sm:px-4 sm:py-3 hover:bg-purple-300 transition-colors cursor-pointer text-xs sm:text-base"
+//                                                         onClick={() => handleSelect('course', course.category_name, course.course_id)}
+//                                                     >
+//                                                         {course.category_name}
+//                                                     </div>
+//                                                 ))}
+//                                             </div>
+//                                         )}
+//                                     </div>
+//                                 </div>
+//                             </div>
+//                         </div>
+//                     </div>
+
+//                 </form>
+
+//                 <ErrorNotification />
+//                 {isModalOpen && openCourseModal()}
+//             </div>
+//             <div className='px-20'>
+//                 <div className="mt-5 w-full bg-purple-200 rounded-lg p-4 px-10 py-5">
+//                     <h1 className="text-xl font-semibold mb-4">Instructor Presentation Skills</h1>
+//                     <div className="flex flex-col items-start space-y-4">
+//                         <label className="flex items-center">
+//                             <input
+//                                 type="radio"
+//                                 name="presentationSkills"
+//                                 value="excellent"
+//                                 checked={rating === 'excellent'}
+//                                 onChange={() => setRating('excellent')}
+//                                 className="mr-2"
+//                             />
+//                             Excellent
+//                         </label>
+//                         <label className="flex items-center">
+//                             <input
+//                                 type="radio"
+//                                 name="presentationSkills"
+//                                 value="good"
+//                                 checked={rating === 'good'}
+//                                 onChange={() => setRating('good')}
+//                                 className="mr-2"
+//                             />
+//                             Good
+//                         </label>
+//                         <label className="flex items-center">
+//                             <input
+//                                 type="radio"
+//                                 name="presentationSkills"
+//                                 value="poor"
+//                                 checked={rating === 'poor'}
+//                                 onChange={() => setRating('poor')}
+//                                 className="mr-2"
+//                             />
+//                             Poor
+//                         </label>
+//                     </div>
+//                 </div>
+//                 <div className="mt-5 w-full bg-purple-200 rounded-lg p-4 px-10 py-5">
+//                     <h1 className="text-xl font-semibold mb-4">Instructor's Response to Students Questions</h1>
+//                     <div className="flex flex-col items-start space-y-4">
+//                         <label className="flex items-center">
+//                             <input
+//                                 type="radio"
+//                                 name="presentationSkills"
+//                                 value="excellent"
+//                                 checked={rating === 'excellent'}
+//                                 onChange={() => setRating('excellent')}
+//                                 className="mr-2"
+//                             />
+//                             Excellent
+//                         </label>
+//                         <label className="flex items-center">
+//                             <input
+//                                 type="radio"
+//                                 name="presentationSkills"
+//                                 value="good"
+//                                 checked={rating === 'good'}
+//                                 onChange={() => setRating('good')}
+//                                 className="mr-2"
+//                             />
+//                             Good
+//                         </label>
+//                         <label className="flex items-center">
+//                             <input
+//                                 type="radio"
+//                                 name="presentationSkills"
+//                                 value="poor"
+//                                 checked={rating === 'poor'}
+//                                 onChange={() => setRating('poor')}
+//                                 className="mr-2"
+//                             />
+//                             Poor
+//                         </label>
+//                     </div>
+//                 </div>
+//                 <div className="mt-5 w-full bg-purple-200 rounded-lg p-4 px-10 py-5">
+//                     <h1 className="text-xl font-semibold mb-4">Please provide your rating for our entire session.</h1>
+//                     <div className="flex flex-col items-start space-y-4">
+//                         <label className="flex items-center">
+//                             <input
+//                                 type="radio"
+//                                 name="presentationSkills"
+//                                 value="excellent"
+//                                 checked={rating === 'excellent'}
+//                                 onChange={() => setRating('excellent')}
+//                                 className="mr-2"
+//                             />
+//                             Excellent
+//                         </label>
+//                         <label className="flex items-center">
+//                             <input
+//                                 type="radio"
+//                                 name="presentationSkills"
+//                                 value="good"
+//                                 checked={rating === 'good'}
+//                                 onChange={() => setRating('good')}
+//                                 className="mr-2"
+//                             />
+//                             Good
+//                         </label>
+//                         <label className="flex items-center">
+//                             <input
+//                                 type="radio"
+//                                 name="presentationSkills"
+//                                 value="poor"
+//                                 checked={rating === 'poor'}
+//                                 onChange={() => setRating('poor')}
+//                                 className="mr-2"
+//                             />
+//                             Poor
+//                         </label>
+//                     </div>
+//                 </div>
+//                 <div className="mt-5 w-full bg-purple-200 rounded-lg p-4 px-10 py-5">
+//                     <h1 className="text-xl font-semibold mb-4">Would you be interested in enrolling in our COURSES ?</h1>
+//                     <div className="flex flex-col items-start space-y-4">
+//                         <label className="flex items-center">
+//                             <input
+//                                 type="radio"
+//                                 name="presentationSkills"
+//                                 value="yes"
+//                                 checked={rating === 'excellent'}
+//                                 onChange={() => setRating('excellent')}
+//                                 className="mr-2"
+//                             />
+//                             Yes
+//                         </label>
+//                         <label className="flex items-center">
+//                             <input
+//                                 type="radio"
+//                                 name="presentationSkills"
+//                                 value="No"
+//                                 checked={rating === 'good'}
+//                                 onChange={() => setRating('good')}
+//                                 className="mr-2"
+//                             />
+//                             No
+//                         </label>
+//                     </div>
+//                 </div>
+//                 <div className="mt-5 w-full bg-purple-200 rounded-lg p-4 px-10 py-5">
+//                     <h1 className="text-xl font-semibold mb-4">Would you be interested in enrolling on our INTERNSHIP PROGRAMS ?</h1>
+//                     <div className="flex flex-col items-start space-y-4">
+//                         <label className="flex items-center">
+//                             <input
+//                                 type="radio"
+//                                 name="presentationSkills"
+//                                 value="yes"
+//                                 checked={rating === 'excellent'}
+//                                 onChange={() => setRating('excellent')}
+//                                 className="mr-2"
+//                             />
+//                             Yes
+//                         </label>
+//                         <label className="flex items-center">
+//                             <input
+//                                 type="radio"
+//                                 name="presentationSkills"
+//                                 value="No"
+//                                 checked={rating === 'good'}
+//                                 onChange={() => setRating('good')}
+//                                 className="mr-2"
+//                             />
+//                             No
+//                         </label>
+//                     </div>
+//                 </div>
+
+//                 <div className="mt-5 w-full bg-purple-200 rounded-lg p-4 px-10 py-5">
+//                     <h1 className="text-xl font-semibold mb-4">Would you like to LEARN any of the following Technologies?</h1>
+//                     <div className="flex flex-col items-start space-y-4">
+//                         <label className="flex items-center">
+//                             <input
+//                                 type="checkbox"
+//                                 name="technologies"
+//                                 value="AWS"
+//                                 checked={selectedTechnologies.includes('AWS')}
+//                                 onChange={() => handleTechnologyChange('AWS')}
+//                                 className="mr-2"
+//                             />
+//                             Amazon Web Services (AWS)
+//                         </label>
+//                         <label className="flex items-center">
+//                             <input
+//                                 type="checkbox"
+//                                 name="technologies"
+//                                 value="AI"
+//                                 checked={selectedTechnologies.includes('AI')}
+//                                 onChange={() => handleTechnologyChange('AI')}
+//                                 className="mr-2"
+//                             />
+//                             Artificial Intelligence
+//                         </label>
+//                         <label className="flex items-center">
+//                             <input
+//                                 type="checkbox"
+//                                 name="technologies"
+//                                 value="ML"
+//                                 checked={selectedTechnologies.includes('ML')}
+//                                 onChange={() => handleTechnologyChange('ML')}
+//                                 className="mr-2"
+//                             />
+//                             Machine Learning
+//                         </label>
+//                         <label className="flex items-center">
+//                             <input
+//                                 type="checkbox"
+//                                 name="technologies"
+//                                 value="DS"
+//                                 checked={selectedTechnologies.includes('DS')}
+//                                 onChange={() => handleTechnologyChange('DS')}
+//                                 className="mr-2"
+//                             />
+//                             Data Science / Analytics
+//                         </label>
+//                         <label className="flex items-center">
+//                             <input
+//                                 type="checkbox"
+//                                 name="technologies"
+//                                 value="CyberSecurity"
+//                                 checked={selectedTechnologies.includes('CyberSecurity')}
+//                                 onChange={() => handleTechnologyChange('CyberSecurity')}
+//                                 className="mr-2"
+//                             />
+//                             Cyber Security / Ethical Hacking
+//                         </label>
+//                         <label className="flex items-center">
+//                             <input
+//                                 type="checkbox"
+//                                 name="technologies"
+//                                 value="CorePython"
+//                                 checked={selectedTechnologies.includes('CorePython')}
+//                                 onChange={() => handleTechnologyChange('CorePython')}
+//                                 className="mr-2"
+//                             />
+//                             Core Python
+//                         </label>
+//                         <label className="flex items-center">
+//                             <input
+//                                 type="checkbox"
+//                                 name="technologies"
+//                                 value="AdvancedPython"
+//                                 checked={selectedTechnologies.includes('AdvancedPython')}
+//                                 onChange={() => handleTechnologyChange('AdvancedPython')}
+//                                 className="mr-2"
+//                             />
+//                             Advanced Python & Frameworks
+//                         </label>
+//                         <label className="flex items-center">
+//                             <input
+//                                 type="checkbox"
+//                                 name="technologies"
+//                                 value="CoreJava"
+//                                 checked={selectedTechnologies.includes('CoreJava')}
+//                                 onChange={() => handleTechnologyChange('CoreJava')}
+//                                 className="mr-2"
+//                             />
+//                             Core JAVA
+//                         </label>
+//                         <label className="flex items-center">
+//                             <input
+//                                 type="checkbox"
+//                                 name="technologies"
+//                                 value="IOT"
+//                                 checked={selectedTechnologies.includes('IOT')}
+//                                 onChange={() => handleTechnologyChange('IOT')}
+//                                 className="mr-2"
+//                             />
+//                             Internet of Things (IOT)
+//                         </label>
+//                         <label className="flex items-center">
+//                             <input
+//                                 type="checkbox"
+//                                 name="technologies"
+//                                 value="EmbeddedSystems"
+//                                 checked={selectedTechnologies.includes('EmbeddedSystems')}
+//                                 onChange={() => handleTechnologyChange('EmbeddedSystems')}
+//                                 className="mr-2"
+//                             />
+//                             Embedded Systems
+//                         </label>
+//                         <label className="flex items-center">
+//                             <input
+//                                 type="checkbox"
+//                                 name="technologies"
+//                                 value="WebAppDevelopment"
+//                                 checked={selectedTechnologies.includes('WebAppDevelopment')}
+//                                 onChange={() => handleTechnologyChange('WebAppDevelopment')}
+//                                 className="mr-2"
+//                             />
+//                             Web Application Development
+//                         </label>
+//                         <label className="flex items-center">
+//                             <input
+//                                 type="checkbox"
+//                                 name="technologies"
+//                                 value="FullStackDevelopment"
+//                                 checked={selectedTechnologies.includes('FullStackDevelopment')}
+//                                 onChange={() => handleTechnologyChange('FullStackDevelopment')}
+//                                 className="mr-2"
+//                             />
+//                             Full Stack Development
+//                         </label>
+//                         <label className="flex items-center">
+//                             <input
+//                                 type="checkbox"
+//                                 name="technologies"
+//                                 value="ReactJS"
+//                                 checked={selectedTechnologies.includes('ReactJS')}
+//                                 onChange={() => handleTechnologyChange('ReactJS')}
+//                                 className="mr-2"
+//                             />
+//                             React JS / Angular JS
+//                         </label>
+//                         <label className="flex items-center">
+//                             <input
+//                                 type="checkbox"
+//                                 name="technologies"
+//                                 value="UIUXDesign"
+//                                 checked={selectedTechnologies.includes('UIUXDesign')}
+//                                 onChange={() => handleTechnologyChange('UIUXDesign')}
+//                                 className="mr-2"
+//                             />
+//                             UI/UX Design
+//                         </label>
+//                     </div>
+//                 </div>
+//                 <div className="flex justify-center mt-4 sm:mt-6">
+//                     <button
+//                         type="submit"
+//                         className="w-full sm:w-auto px-10 sm:px-16 py-2 sm:py-3 bg-purple-600 text-white rounded-lg shadow-md 
+//                 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 
+//                 focus:ring-offset-2 transition duration-300 ease-in-out text-sm sm:text-lg font-semibold"
+//                     >
+//                         SUBMIT
+//                     </button>
+//                 </div>
+//             </div>
+//         </>
+//     );
+// };
+
+// export default StudentReviewForm;
+
+

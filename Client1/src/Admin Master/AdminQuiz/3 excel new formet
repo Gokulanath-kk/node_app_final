@@ -1,0 +1,85 @@
+const parseOptions = (options) => {
+  // Handle different input types for options
+  if (Array.isArray(options)) {
+    // If already an array, process each element
+    return options.map((opt, index) => ({
+      id: typeof opt === 'number' ? opt : index,
+      text: String(opt)
+    }));
+  } else if (typeof options === 'string') {
+    // If string, split by comma and trim
+    return options.split(',').map((opt, index) => ({
+      id: index,
+      text: opt.trim()
+    }));
+  } else if (typeof options === 'number') {
+    // If single number, convert to array
+    return [{ id: options, text: String(options) }];
+  } else {
+    throw new Error(`Invalid options format: ${JSON.stringify(options)}`);
+  }
+};
+
+const parseCorrectAnswers = (correctAns) => {
+  // Handle different input types for correct answers
+  if (Array.isArray(correctAns)) {
+    // If array, return as is
+    return correctAns.map(ans => String(ans));
+  } else if (typeof correctAns === 'string') {
+    // If string, split by comma and trim
+    return correctAns.split(',').map(ans => ans.trim());
+  } else if (typeof correctAns === 'number') {
+    // If single number, convert to array
+    return [String(correctAns)];
+  } else {
+    throw new Error(`Invalid correct answer format: ${JSON.stringify(correctAns)}`);
+  }
+};
+
+const validateExcelData = (data) => {
+  const requiredColumns = [
+    "Quiz_name",
+    "Quiz_Question",
+    "quiz_option",
+    "Quiz_Correct_ans",
+    "quiz_description",
+    "quiz_type",
+  ];
+
+  const missingColumns = requiredColumns.filter(
+    (col) => !Object.keys(data[0] || {}).includes(col)
+  );
+
+  if (missingColumns.length > 0) {
+    throw new Error(`Missing required columns: ${missingColumns.join(", ")}`);
+  }
+
+  return data.map((row) => {
+    // Parse options
+    const rawOptions = parseOptions(row.quiz_option);
+
+    // Parse correct answers
+    const rawCorrectAnswers = parseCorrectAnswers(row.Quiz_Correct_ans);
+
+    // Match correct options
+    const correctOptionsWithId = rawCorrectAnswers
+      .map((correctText) => {
+        const matchingOption = rawOptions.find(
+          (opt) => String(opt.text).toLowerCase() === String(correctText).toLowerCase()
+        );
+        return matchingOption
+          ? { ...matchingOption, isCorrect: true }
+          : null;
+      })
+      .filter(Boolean);
+
+    return {
+      Quiz_name: row.Quiz_name,
+      Quiz_Question: row.Quiz_Question,
+      quiz_option: rawOptions,
+      Quiz_Correct_ans: correctOptionsWithId,
+      quiz_description: row.quiz_description || "",
+      quiz_type: row.quiz_type,
+    };
+  });
+};

@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+    font-family: 'astron_boy';
+    src: url('/public/fonts/astron_boy/Astron Boy.otf') format('opentype'),
+         url('/public/fonts/astron_boy/Astron Boy.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'bankgothic';
+    src: url('/public/fonts/bankgothic-md-bt/BankGothic Bold.ttf') format('truetype'),
+         url('/public/fonts/bankgothic-md-bt/Bank Gothic Light Regular.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+}
+

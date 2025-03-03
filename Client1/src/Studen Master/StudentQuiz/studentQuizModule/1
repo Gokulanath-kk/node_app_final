@@ -1,0 +1,59 @@
+import React, { useCallback, useEffect, useState } from 'react';
+import axiosInstance from '../../axiosInstance';
+
+const QuizSideBar = () => {
+  const [quiz, setQuiz] = useState([]);
+
+  const fetchQuiz = useCallback(async () => {
+    try {
+      const res = await axiosInstance.get('/quiz/QuizData');
+      console.log(res.data);
+      setQuiz(res.data);
+    } catch (err) {
+      console.error(err, 'Error');
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchQuiz();
+  }, [fetchQuiz]);
+
+  return (
+    <div className="container">
+      <div className="bg-purple-200 min-h-screen ml-20">
+        <div className="flex flex-col items-center">
+          <h1 className="text-2xl font-bold mb-4">Quiz List</h1>
+          <div className="w-full px-4">
+            {quiz.map((quizItem) => (
+              <div
+                key={quizItem.Quiz_id}
+                className="p-4 mb-4 bg-white shadow-md rounded-lg"
+              >
+                <h2 className="text-xl font-semibold">{quizItem.Quiz_name}</h2>
+                <p className="text-gray-700">{quizItem.Quiz_Question}</p>
+                <ul className="mt-2">
+                  {JSON.parse(quizItem.quiz_option).map((option) => (
+                    <li
+                      key={option.id}
+                      className="text-gray-600"
+                    >
+                      {option.text}
+                    </li>
+                  ))}
+                </ul>
+                <p className="text-sm text-gray-500 mt-2">
+                  Quiz Type: {quizItem.quiz_type}
+                </p>
+                <p className="text-sm text-gray-500">
+                  Description: {quizItem.quiz_description}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default QuizSideBar;
